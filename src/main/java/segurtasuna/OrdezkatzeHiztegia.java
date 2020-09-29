@@ -1,5 +1,8 @@
 package segurtasuna;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class OrdezkatzeHiztegia {
 
     private String hiztegia = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -16,12 +19,29 @@ public class OrdezkatzeHiztegia {
                 if (i != args.length) mezua += " ";
             }
         }
-        OrdezkatzeHiztegia ordezkatzeHiztegia = new OrdezkatzeHiztegia();
-        String zifraketa = ordezkatzeHiztegia.zifratu(mezua);
-        System.out.println("Lortutako kriptograma: " + zifraketa);
+        try {
+            OrdezkatzeHiztegia ordezkatzeHiztegia = new OrdezkatzeHiztegia();
+            int j = 0;
+            while (!ordezkatzeHiztegia.sarreraEgokia(mezua)) { //Letraz osatutako esaldi bat sarrera moduan eman arte
+                j++;
+                if (j > 5) {
+                    throw new Exception();
+                }
+                InputStreamReader isr = new InputStreamReader(System.in);
+                BufferedReader br = new BufferedReader (isr);
+                System.out.println("Bakarrik letrak edo hutsuneak onartzen dira sarrera gisa. Berriro saiatu:");
+                mezua = br.readLine();
+            }
+            String zifraketa = ordezkatzeHiztegia.zifratu(mezua);
+            String deszifraketa = ordezkatzeHiztegia.deszifratu(zifraketa);
+            System.out.println("Lortutako kriptograma: " + zifraketa);
+            System.out.println("Kriptograma deszifratuz lortutako mezu argia: " + deszifraketa);
+        } catch (Exception e) {
+            System.out.println("Ezin dizkizut aukera gehiago eskaini. Agur!");
+        }
     }
 
-    public String zifratu(String mezua){
+    public String zifratu(String mezua) {
         String kriptograma = "";
         char letra;
         int i = 0;
@@ -47,8 +67,47 @@ public class OrdezkatzeHiztegia {
         return kriptograma;
     }
 
-    public String deszifratu(String kripto){
+    public String deszifratu(String kripto) {
+        String mezuArgia = "";
+        char letra;
+        int i = 0;
+        int letraPos;
+        while (i < kripto.length()) { //Sartutako mezu osoa karakterez karaktere zeharkatu
+            if (kripto.charAt(i) == ' ') { //Aurkitutako espazioak kudeatu
+                mezuArgia += " ";
+            }
+            else {
+                letra = kripto.charAt(i);
+                if (Character.isLowerCase(letra)) { //Begiratutako letra xehea izatekotan sartu
+                    letra = Character.toUpperCase(letra);
+                    letraPos = gakoa.indexOf(letra);
+                    mezuArgia += Character.toLowerCase(hiztegia.charAt(letraPos));
+                }
+                else { //Begiratutako letra larria izatekotan sartu
+                    letraPos = gakoa.indexOf(letra);
+                    mezuArgia += hiztegia.charAt(letraPos);
+                }
+            }
+            i++;
+        }
+        return mezuArgia;
+    }
 
-        return "";
+    private boolean sarreraEgokia(String mezua) {
+        boolean egokia = true;
+        int i = 0;
+        if (!mezua.isBlank()) { //Sartutako mezua hutsik ez dagoela ziurtatzeko
+            while (i < mezua.length() && egokia) { //Letra edo hutsune ez den karakteren bat dagoen ala ez konprobatu
+                if (!Character.isLetter(mezua.charAt(i)) && mezua.charAt(i) != ' ') {
+                    egokia = false;
+                }
+                i++;
+            }
+            System.out.println();
+        }
+        else {
+            egokia = false;
+        }
+        return egokia;
     }
 }
